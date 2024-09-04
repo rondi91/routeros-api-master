@@ -3,71 +3,37 @@ require('koneksi.php');
 
 $API = new RouterosAPI();
 
-
-$interface = 'ether5'; // Ganti dengan nama interface yang ingin Anda monitor
+$interfacesData = [];
 
 if ($API->connect($ip,$user,$pass)) {
-    // Ambil data interface
-    $API->write('/interface/monitor-traffic', false);
-    $API->write('=interface=' . $interface, false);
-    $API->write('=once=', true);
-    $interfaceStats = $API->read();
-    $API->disconnect();
+    // Ambil data untuk beberapa interface Ethernet
+    $interfaces = ['ether2', 'ether4', 'ether5'];
 
-    // Inisialisasi variabel untuk menyimpan data
-    $rxBytes = 0;
-    $txBytes = 0;
-
-    if (!empty($interfaceStats)) {
-        $rxBytes = $interfaceStats[0]['rx-bits-per-second'];
-        $txBytes = $interfaceStats[0]['tx-bits-per-second'];
+    foreach ($interfaces as $interface) {
+        $API->write('/interface/monitor-traffic', false);
+        $API->write('=interface=' . $interface, false);
+        $API->write('=once=', true);
+        $read = $API->read();
+        if (isset($read[0])) {
+            $rx_bps = isset($read[0]['rx-bits-per-second']) ? $read[0]['rx-bits-per-second'] : 0;
+            $tx_bps = isset($read[0]['tx-bits-per-second']) ? $read[0]['tx-bits-per-second'] : 0;
+            // Konversi ke Mbps
+            $interfacesData[$interface] = [
+                'rx_mbps' => round($rx_bps / (1024 * 1024), 2),
+                'tx_mbps' => round($tx_bps / (1024 * 1024), 2),
+            ];
+        } else {
+            $interfacesData[$interface] = [
+                'rx_mbps' => 0,
+                'tx_mbps' => 0,
+            ];
+        }
     }
+
+    $API->disconnect();
 } else {
     die('Tidak dapat terhubung ke router Mikrotik.');
 }
+
+echo json_encode($interfacesData);
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Monitor</title>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
-        google.charts.load('current', {'packages':['gauge']});
-        google.charts.setOnLoadCallback(drawChart);
-
-        function drawChart() {
-            var data = google.visualization.arrayToDataTable([
-                ['Label', 'Value'],
-                ['Download', <?php echo $rxBytes; ?>],
-                ['Upload', <?php echo $txBytes; ?>]
-            ]);
-
-            var options = {
-                width: 400, height: 120,
-                redFrom: 900000, redTo: 1000000,
-                yellowFrom: 500000, yellowTo: 900000,
-                minorTicks: 5,
-                max: 1000000
-            };
-
-            var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
-
-            chart.draw(data, options);
-
-            // Auto refresh every 2 seconds
-            setInterval(function() {
-                window.location.reload();
-            }, 2000);
-        }
-    </script>
-</head>
-<body>
-    <div class="container mt-5">
-        <h1>Network Monitor - Interface: <?php echo $interface; ?></h1>
-        <div id="chart_div" style="width: 400px; height: 120px;"></div>
-    </div>
-</body>
-</html>
