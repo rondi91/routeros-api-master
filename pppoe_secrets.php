@@ -98,15 +98,17 @@ foreach ($secrets as $secret) {
         <input type="text" id="searchInput" class="form-control" placeholder="Search by Name, Profile, or Status..." onkeyup="searchTable()">
     </div>
 
+    <form id="bulkUpdateForm" method="POST" action="update_profile.php">
         <table class="table table-bordered" id="pppoeTable">
             <thead>
                 <tr>
+                    <th>Select</th> <!-- Checkbox untuk memilih secret -->
                     <th>No</th>
-                    <th class="sortable" onclick="sortTable(1)">Name</th>
+                    <th class="sortable" onclick="sortTable(2)">Name</th>
                     <th>Service</th>
-                    <th class="sortable" onclick="sortTable(3)">Profile</th>
+                    <th class="sortable" onclick="sortTable(5)">Profile</th>
                     <th>Last Logged Out</th>
-                    <th class="sortable" onclick="sortTable(5)">Status</th>
+                    <th class="sortable" onclick="sortTable(7)">Status</th>
                     <th>IP</th>
                     <th>Edit</th>
                 </tr>
@@ -117,6 +119,8 @@ foreach ($secrets as $secret) {
                     $no = 1; ?>
                      <?php foreach ($secrets as $secret): ?>
                         <tr>
+                            
+                        <td><input type="checkbox" name="selected_secrets[]" value="<?= $secret['name']; ?>"></td> <!-- Checkbox -->
                             <td><?= $no; ?></td>
                             <td><?= $secret['name']; ?></td>
                             <td><?= $secret['service']; ?></td>
@@ -156,6 +160,20 @@ foreach ($secrets as $secret) {
                 
             </tbody>
         </table>
+
+         <!-- Dropdown untuk memilih profile baru -->
+    <div>
+        <label for="newProfile">Select New Profile:</label>
+        <select name="new_profile" id="newProfile">
+            <?php foreach ($profiles as $profile): ?>
+                <option value="<?= $profile['name']; ?>"><?= $profile['name']; ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <!-- Tombol untuk submit perubahan -->
+    <button type="submit">Update Selected Secrets</button>
+</form>
     </div>
 
     <!-- Modal untuk Edit Profile -->
