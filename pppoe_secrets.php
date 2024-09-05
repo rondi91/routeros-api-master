@@ -107,31 +107,53 @@ foreach ($secrets as $secret) {
                     <th class="sortable" onclick="sortTable(3)">Profile</th>
                     <th>Last Logged Out</th>
                     <th class="sortable" onclick="sortTable(5)">Status</th>
+                    <th>IP</th>
                     <th>Edit</th>
                 </tr>
             </thead>
             <tbody>
                 <?php
-                if (isset($secrets)) {
-                    $no = 1;
-                    foreach ($secrets as $secret) {
-                        $status = in_array($secret['name'], $activeUsers) ? 'active' : 'off';
-                        $statusClass = $status == 'off' ? 'off' : '';
-                        echo "<tr>";
-                        echo "<td>{$no}</td>";
-                        echo "<td>{$secret['name']}</td>";
-                        echo "<td>{$secret['service']}</td>";
-                        echo "<td>{$secret['profile']}</td>";
-                        echo "<td>{$secret['last-logged-out']}</td>";
-                        echo "<td class='{$statusClass}'>{$status}</td>";
-                        echo "<td>
-                                <button class='btn btn-primary btn-sm' onclick='editProfile(\"{$secret['name']}\", \"{$secret['profile']}\")'>Edit</button>
-                              </td>";
-                        echo "</tr>";
-                        $no++;
-                    }
-                }
-                ?>
+                if (isset($secrets)) : 
+                    $no = 1; ?>
+                     <?php foreach ($secrets as $secret): ?>
+                        <tr>
+                            <td><?= $no; ?></td>
+                            <td><?= $secret['name']; ?></td>
+                            <td><?= $secret['service']; ?></td>
+                            <td><?= $secret['profile']; ?></td>
+                            
+                            
+                            <td><?= $secret['last-logged-out']; ?></td>
+                            <td>
+                                <?php
+                                $status = 'Off';
+                                $ip_address = '';
+                                foreach ($activeConnections as $active) {
+                                    if ($active['name'] == $secret['name']) {
+                                        $status = 'Active';
+                                        $ip_address = $active['address']; // Ambil alamat IP dari active connection
+                                        break;
+                                    }
+                                }
+                                echo $status;
+                                ?>
+                            </td>
+                            <td>
+                                <?php if ($status == 'Active'): ?>
+                                    <a href="http://<?= $ip_address; ?>" target="_blank"><?= $ip_address; ?></a> <!-- Tambahkan tautan untuk IP -->
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </td>
+                           <td>
+                                <button class='btn btn-primary btn-sm' onclick='editProfile("<?= $secret["name"]; ?>" , "<?= $secret["profile"]; ?>")'>Edit</button>
+                              </td>
+                              
+                        </tr>
+                        <?php  $no++; ?>
+                        <?php endforeach; ?>
+                    <?php endif ?>
+                
             </tbody>
         </table>
     </div>

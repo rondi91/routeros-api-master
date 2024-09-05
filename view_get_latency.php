@@ -5,13 +5,21 @@
     <title>Latency Monitor</title>
     <style>
         #latencyChart {
-            max-width: 600px;
-            margin: 50px auto;
+            max-width: 1000px;
+            max-height: 600px;
+            width: 100%;
+            height: auto;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         let chart;
+        let timestamps = [];
+        let latencyData = {
+            google: [],
+            youtube: [],
+            facebook: []
+        };
 
         function fetchLatency() {
             fetch('get_latency.php')
@@ -26,27 +34,60 @@
         }
 
         function updateChart(data) {
-            const labels = Object.keys(data);
-            const latencies = Object.values(data).map(latency => latency.toFixed(2));
+            const now = new Date().toLocaleTimeString();
+
+            timestamps.push(now);
+            if (timestamps.length > 20) {
+                timestamps.shift(); // Keep only the last 20 timestamps
+            }
+
+            latencyData.google.push(data['8.8.8.8']);
+            latencyData.youtube.push(data['youtube.com']);
+            latencyData.facebook.push(data['facebook.com']);
+
+            if (latencyData.google.length > 20) {
+                latencyData.google.shift();
+                latencyData.youtube.shift();
+                latencyData.facebook.shift();
+            }
 
             if (chart) {
-                chart.data.labels = labels;
-                chart.data.datasets[0].data = latencies;
                 chart.update();
             } else {
                 const ctx = document.getElementById('latencyChart').getContext('2d');
                 chart = new Chart(ctx, {
-                    type: 'bar',
+                    type: 'line',
                     data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Latency (ms)',
-                            data: latencies,
-                            backgroundColor: latencies.map(latency => latency < 100 ? 'green' : 'red')
-                        }]
+                        labels: timestamps,
+                        datasets: [
+                            {
+                                label: 'Google (8.8.8.8)',
+                                data: latencyData.google,
+                                borderColor: 'red',
+                                fill: false
+                            },
+                            {
+                                label: 'YouTube',
+                                data: latencyData.youtube,
+                                borderColor: 'blue',
+                                fill: false
+                            },
+                            {
+                                label: 'Facebook',
+                                data: latencyData.facebook,
+                                borderColor: 'green',
+                                fill: false
+                            }
+                        ]
                     },
                     options: {
                         scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time'
+                                }
+                            },
                             y: {
                                 beginAtZero: true,
                                 title: {
@@ -54,13 +95,19 @@
                                     text: 'Latency (ms)'
                                 }
                             }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
                         }
                     }
                 });
             }
         }
 
-        setInterval(fetchLatency, 5000); // Fetch data every 5 seconds
+        setInterval(fetchLatency, 1000); // Fetch data every 5 seconds
     </script>
 </head>
 <body>
