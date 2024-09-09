@@ -144,13 +144,13 @@ foreach ($secrets as $secret) {
                             </td>
                             <td>
                                 <?php if ($status == 'Active'): ?>
-                                    <a href="http://<?= $ip_address; ?>" target="_blank"><?= $ip_address; ?></a> <!-- Tambahkan tautan untuk IP -->
+                                    <a href="http://<?= $ip_address; ?>" target="_blank"><?= $ip_address ; ?></a> <!-- Tambahkan tautan untuk IP -->
                                 <?php else: ?>
                                     -
                                 <?php endif; ?>
                             </td>
                            <td>
-                                <button class='btn btn-primary btn-sm' onclick='editProfile("<?= $secret["name"]; ?>" , "<?= $secret["profile"]; ?>")'>Edit</button>
+                                <button class='btn btn-primary btn-sm' onclick='editProfile1("<?= $secret["name"]; ?>" , "<?= $secret["profile"]; ?>")'>Edit</button>
                               </td>
                               
                         </tr>

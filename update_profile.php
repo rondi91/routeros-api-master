@@ -17,6 +17,7 @@ if ($API->connect($ip,$user,$pass))  {
                 "numbers" => $secret_name,
                 "profile" => $new_profile
             ));
+            
         }
         
         echo "Profile updated successfully.";
