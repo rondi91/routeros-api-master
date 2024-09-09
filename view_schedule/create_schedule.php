@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $new_profile = $_POST['new_profile'];
     $schedule_time = $_POST['schedule_time'];
 
+ 
     // Tambahkan detik jika hanya format HH:MM diberikan
     if (strlen($schedule_time) == 5) {
         $schedule_time .= ":00"; // Tambahkan detik (00) untuk format HH:MM menjadi HH:MM:SS
@@ -18,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($API->connect($ip,$user,$pass)) {
 
          // Nama scheduler yang akan ditambahkan
-         $scheduler_name = "Change-Profile-$pppoe_user";
+         $scheduler_name = "$pppoe_user";
 
          // Cek apakah scheduler dengan nama ini sudah ada
          $existing_schedulers = $API->comm("/system/scheduler/print", array(
@@ -45,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // Buat schedule di Mikrotik
         $response = $API->comm("/system/scheduler/add", array(
-            "name" => "Change-Profile-$pppoe_user",
+            "name" => "$pppoe_user",
             "start-time" => $schedule_time,
             "on-event" => $on_event_command,
             "disabled" => "no"

@@ -2,7 +2,6 @@
 require('../koneksi.php');
 
 $API = new RouterosAPI();
-
 $API->debug = false; // Ubah ke true jika ingin melihat detail request API
 
 ?>
@@ -33,6 +32,7 @@ $API->debug = false; // Ubah ke true jika ingin melihat detail request API
 
     <?php
     // Coba hubungkan ke Mikrotik
+    
     if ($API->connect($ip,$user,$pass)){
 
         // Ambil semua schedule dari Mikrotik
@@ -49,12 +49,15 @@ $API->debug = false; // Ubah ke true jika ingin melihat detail request API
             echo '<th>On Event</th>';
             echo '<th>Next Run</th>';
             echo '<th>Disabled</th>';
+            echo '<th>Edit</th>';
+            echo '<th>Delete</th>';
             echo '</tr>';
             echo '</thead>';
             echo '<tbody>';
 
             // Loop untuk setiap schedule dan tampilkan dalam tabel
             foreach ($schedules as $schedule) {
+                $id = $schedule['.id']; // Dapatkan ID dari setiap scheduler
                 echo '<tr>';
                 echo '<td>' . (isset($schedule['name']) ? $schedule['name'] : 'N/A') . '</td>';
                 echo '<td>' . (isset($schedule['start-time']) ? $schedule['start-time'] : 'N/A') . '</td>';
@@ -62,6 +65,8 @@ $API->debug = false; // Ubah ke true jika ingin melihat detail request API
                 echo '<td>' . (isset($schedule['on-event']) ? htmlspecialchars($schedule['on-event']) : 'N/A') . '</td>';
                 echo '<td>' . (isset($schedule['next-run']) ? $schedule['next-run'] : 'N/A') . '</td>';
                 echo '<td>' . (isset($schedule['disabled']) && $schedule['disabled'] == 'true' ? 'Yes' : 'No') . '</td>';
+                echo '<td><a href="edit_schedule.php?id=' . $id . '">Edit</a></td>';
+                echo '<td><a href="delete_schedule.php?id=' . $id . '" onclick="return confirm(\'Are you sure you want to delete this schedule?\');">Delete</a></td>';
                 echo '</tr>';
             }
 
