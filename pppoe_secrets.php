@@ -110,6 +110,7 @@ foreach ($secrets as $secret) {
                     <th>Last Logged Out</th>
                     <th class="sortable" onclick="sortTable(7)">Status</th>
                     <th>IP</th>
+                    <th>Details</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -149,6 +150,8 @@ foreach ($secrets as $secret) {
                                     -
                                 <?php endif; ?>
                             </td>
+
+                           <?php echo '<td><a href="/pppoe_trafic/pppoe_detail.php?name=' . $active['name'] . '">View Traffic</a></td>' ?>
                            <td>
                                 <button class='btn btn-primary btn-sm' onclick='editProfile1("<?= $secret["name"]; ?>" , "<?= $secret["profile"]; ?>")'>Edit</button>
                               </td>
