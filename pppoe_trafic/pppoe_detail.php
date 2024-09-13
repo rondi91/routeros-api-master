@@ -9,8 +9,8 @@ if (isset($_GET['name'])) {
 
     if ($API->connect($ip,$user,$pass)) {
 
-        // Ambil detail dari client PPPoE berdasarkan nama
-        $client = $API->comm("/ppp/active/print", array(
+         // Ambil detail dari client PPPoE berdasarkan nama
+         $client = $API->comm("/ppp/active/print", array(
             "?name" => $user_name
         ));
 
@@ -40,59 +40,101 @@ if (isset($_GET['name'])) {
     <title>PPPoE User Detail - <?= htmlspecialchars($user_name) ?></title>
     <style>
         .traffic-data {
-            font-size: 10px;
+            font-size: 18px;
             font-weight: bold;
+            text-align: center;
         }
         canvas {
-            max-width: 50%;
-            height: 100px;
+            max-width: 100%;
+            height: 300px;
+        }
+        .gauge-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
         }
     </style>
-    <!-- Load Chart.js dari CDN -->
+    <!-- Load Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        let trafficChart;
-        let labels = [];
-        let downloadData = [];
-        let uploadData = [];
+        let rxDoughnut, txDoughnut;
+        let maxSpeed = 1000; // Set max speed for gauge (in Mbps)
 
-        function initializeChart() {
-            const ctx = document.getElementById('trafficChart').getContext('2d');
-            trafficChart = new Chart(ctx, {
-                type: 'line',
+        function initializeDoughnut() {
+            const ctxRx = document.getElementById('rxDoughnut').getContext('2d');
+            const ctxTx = document.getElementById('txDoughnut').getContext('2d');
+
+            rxDoughnut = new Chart(ctxRx, {
+                type: 'doughnut',
                 data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Download (Mbps)',
-                            data: downloadData,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            fill: true,
-                            tension: 0.1,
-                        },
-                        {
-                            label: 'Upload (Mbps)',
-                            data: uploadData,
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            fill: true,
-                            tension: 0.1,
-                        }
-                    ]
+                    labels: ['Used', 'Remaining'],
+                    datasets: [{
+                        data: [0, maxSpeed],
+                        backgroundColor: ['rgba(75, 192, 192, 1)', 'rgba(75, 192, 192, 0.2)'],
+                        borderWidth: 1
+                    }]
                 },
                 options: {
                     responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true
+                    cutout: '80%',
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return tooltipItem.label + ': ' + tooltipItem.raw + ' Mbps';
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Download (RX)',
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+
+            txDoughnut = new Chart(ctxTx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Used', 'Remaining'],
+                    datasets: [{
+                        data: [0, maxSpeed],
+                        backgroundColor: ['rgba(255, 99, 132, 1)', 'rgba(255, 99, 132, 0.2)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '80%',
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return tooltipItem.label + ': ' + tooltipItem.raw + ' Mbps';
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Upload (TX)',
+                            font: {
+                                size: 18
+                            }
                         }
                     }
                 }
             });
         }
 
-        // Fungsi untuk memperbarui data trafik dan grafik
         function updateTraffic() {
             let userName = '<?= htmlspecialchars($user_name) ?>';
             fetch('pppoe_traffic.php?name=' + userName)
@@ -101,29 +143,26 @@ if (isset($_GET['name'])) {
                     if (data.error) {
                         console.error('Error:', data.error);
                     } else {
-                        // Tambahkan timestamp dan data ke grafik
-                        const now = new Date().toLocaleTimeString();
-                        labels.push(now);
-                        downloadData.push(data.rx);
-                        uploadData.push(data.tx);
+                        // Update nilai doughnut RX dan TX
+                        rxDoughnut.data.datasets[0].data[0] = data.rx;
+                        rxDoughnut.data.datasets[0].data[1] = maxSpeed - data.rx;
 
-                        if (labels.length > 10) {  // Batasi jumlah data di grafik
-                            labels.shift();
-                            downloadData.shift();
-                            uploadData.shift();
-                        }
+                        txDoughnut.data.datasets[0].data[0] = data.tx;
+                        txDoughnut.data.datasets[0].data[1] = maxSpeed - data.tx;
 
-                        // Update chart
-                        trafficChart.update();
+                        document.getElementById('rx-value').textContent = data.rx + ' Mbps';
+                        document.getElementById('tx-value').textContent = data.tx + ' Mbps';
+
+                        rxDoughnut.update();
+                        txDoughnut.update();
                     }
                 })
                 .catch(error => console.error('Error fetching traffic data:', error));
         }
 
-        // Initialize chart saat halaman dimuat
         window.onload = function() {
-            initializeChart();
-            setInterval(updateTraffic, 1000); // Update setiap 5 detik
+            initializeDoughnut();
+            setInterval(updateTraffic, 5000); // Update setiap 5 detik
         };
     </script>
 </head>
@@ -136,8 +175,17 @@ if (isset($_GET['name'])) {
 
 <h3>Real-time Traffic (Download/Upload in Mbps)</h3>
 
-<!-- Tempat untuk chart trafik -->
-<canvas id="trafficChart"></canvas>
+<!-- Tempat untuk doughnut trafik -->
+<div class="gauge-container">
+    <div>
+        <canvas id="rxDoughnut"></canvas>
+        <div class="traffic-data">Download: <span id="rx-value">0 Mbps</span></div>
+    </div>
+    <div>
+        <canvas id="txDoughnut"></canvas>
+        <div class="traffic-data">Upload: <span id="tx-value">0 Mbps</span></div>
+    </div>
+</div>
 
 </body>
 </html>
