@@ -188,6 +188,7 @@ if (isset($_GET['name'])) {
 
 <p><strong>IP Address:</strong> <?= htmlspecialchars($client['address']) ?></p>
 <p><strong>Service:</strong> <?= htmlspecialchars($client['service']) ?></p>
+<p><strong>Paket:</strong> <?= htmlspecialchars($profileData) ?></p>
 
 <h3>Real-time Traffic (Download/Upload in Mbps)</h3>
 
