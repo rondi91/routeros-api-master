@@ -151,7 +151,7 @@ foreach ($secrets as $secret) {
                                 <?php endif; ?>
                             </td>
 
-                           <?php echo '<td><a href="/pppoe_trafic/pppoe_detail.php?name=' . $active['name'] . '">View Traffic</a></td>' ?>
+                           <?php echo '<td><a href="pppoe_detail.php?name=' . $active['name'] . '">View Traffic</a></td>' ?>
                            <td>
                                 <button class='btn btn-primary btn-sm' onclick='editProfile1("<?= $secret["name"]; ?>" , "<?= $secret["profile"]; ?>")'>Edit</button>
                               </td>

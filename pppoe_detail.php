@@ -1,5 +1,5 @@
 <?php
-require('../koneksi.php');
+require('koneksi.php');
 $API = new RouterosAPI();
 
 $API->debug = false; // Aktifkan debug jika diperlukan
@@ -9,13 +9,30 @@ if (isset($_GET['name'])) {
 
     if ($API->connect($ip,$user,$pass)) {
 
-         // Ambil detail dari client PPPoE berdasarkan nama
-         $client = $API->comm("/ppp/active/print", array(
+        // Ambil detail dari client PPPoE berdasarkan nama
+        $client = $API->comm("/ppp/active/print", array(
             "?name" => $user_name
         ));
 
         if (!empty($client)) {
             $client = $client[0]; // Ambil detail dari client
+
+            // Ambil profil PPPoE user
+            $profile = isset($client['profile']) ? $client['profile'] : 'default';
+            
+            // Ambil data profil berdasarkan nama profil user
+            $profileData = $API->comm("/ppp/secret/print", ["?name" =>$user_name]);
+            $maxSpeed = 15; // Default jika tidak ada data di profil
+            $profileData = $profileData[0]['profile'];
+// var_dump(intval($profileData));
+// die();
+           
+           
+
+            // Cek apakah ada data profil yang valid dan ambil nilai kecepatan dari comment (misalnya)
+            if (!empty($profileData) ) {
+                    $maxSpeed = intval($profileData); 
+            }
         } else {
             echo "User not found.";
             exit();
@@ -23,7 +40,7 @@ if (isset($_GET['name'])) {
 
         $API->disconnect();
     } else {
-        echo "Failed to connect to Mikrotik.";
+        echo "Failed to connect to MikroTik.";
         exit();
     }
 } else {
@@ -54,17 +71,16 @@ if (isset($_GET['name'])) {
             margin-top: 20px;
         }
     </style>
-    <!-- Load Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        let rxDoughnut, txDoughnut;
-        let maxSpeed = 1000; // Set max speed for gauge (in Mbps)
+        let rxGauge, txGauge;
+        const maxSpeed = <?= $maxSpeed ?>; // Set max speed for gauge (in Mbps)
+        console.log(maxSpeed);
+        function initializeGauge() {
+            const ctxRx = document.getElementById('rxGauge').getContext('2d');
+            const ctxTx = document.getElementById('txGauge').getContext('2d');
 
-        function initializeDoughnut() {
-            const ctxRx = document.getElementById('rxDoughnut').getContext('2d');
-            const ctxTx = document.getElementById('txDoughnut').getContext('2d');
-
-            rxDoughnut = new Chart(ctxRx, {
+            rxGauge = new Chart(ctxRx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Used', 'Remaining'],
@@ -99,7 +115,7 @@ if (isset($_GET['name'])) {
                 }
             });
 
-            txDoughnut = new Chart(ctxTx, {
+            txGauge = new Chart(ctxTx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Used', 'Remaining'],
@@ -136,33 +152,33 @@ if (isset($_GET['name'])) {
         }
 
         function updateTraffic() {
-            let userName = '<?= htmlspecialchars($user_name) ?>';
+            const userName = '<?= htmlspecialchars($user_name) ?>';
             fetch('pppoe_traffic.php?name=' + userName)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
                         console.error('Error:', data.error);
                     } else {
-                        // Update nilai doughnut RX dan TX
-                        rxDoughnut.data.datasets[0].data[0] = data.rx;
-                        rxDoughnut.data.datasets[0].data[1] = maxSpeed - data.rx;
+                        // Update nilai gauge RX dan TX
+                        rxGauge.data.datasets[0].data[0] = data.rx;
+                        rxGauge.data.datasets[0].data[1] = maxSpeed - data.rx;
 
-                        txDoughnut.data.datasets[0].data[0] = data.tx;
-                        txDoughnut.data.datasets[0].data[1] = maxSpeed - data.tx;
+                        txGauge.data.datasets[0].data[0] = data.tx;
+                        txGauge.data.datasets[0].data[1] = maxSpeed - data.tx;
 
                         document.getElementById('rx-value').textContent = data.rx + ' Mbps';
                         document.getElementById('tx-value').textContent = data.tx + ' Mbps';
 
-                        rxDoughnut.update();
-                        txDoughnut.update();
+                        rxGauge.update();
+                        txGauge.update();
                     }
                 })
                 .catch(error => console.error('Error fetching traffic data:', error));
         }
 
         window.onload = function() {
-            initializeDoughnut();
-            setInterval(updateTraffic, 5000); // Update setiap 5 detik
+            initializeGauge();
+            setInterval(updateTraffic, 1000); // Update setiap 5 detik
         };
     </script>
 </head>
@@ -175,14 +191,14 @@ if (isset($_GET['name'])) {
 
 <h3>Real-time Traffic (Download/Upload in Mbps)</h3>
 
-<!-- Tempat untuk doughnut trafik -->
+<!-- Tempat untuk gauge trafik -->
 <div class="gauge-container">
     <div>
-        <canvas id="rxDoughnut"></canvas>
+        <canvas id="rxGauge"></canvas>
         <div class="traffic-data">Download: <span id="rx-value">0 Mbps</span></div>
     </div>
     <div>
-        <canvas id="txDoughnut"></canvas>
+        <canvas id="txGauge"></canvas>
         <div class="traffic-data">Upload: <span id="tx-value">0 Mbps</span></div>
     </div>
 </div>
