@@ -106,7 +106,7 @@ if (isset($_GET['name'])) {
                         },
                         title: {
                             display: true,
-                            text: 'Download (RX)',
+                            text: 'Upload (TX)',
                             font: {
                                 size: 18
                             }
@@ -141,7 +141,7 @@ if (isset($_GET['name'])) {
                         },
                         title: {
                             display: true,
-                            text: 'Upload (TX)',
+                            text: 'Download (RX)',
                             font: {
                                 size: 18
                             }
@@ -190,17 +190,17 @@ if (isset($_GET['name'])) {
 <p><strong>Service:</strong> <?= htmlspecialchars($client['service']) ?></p>
 <p><strong>Paket:</strong> <?= htmlspecialchars($profileData) ?></p>
 
-<h3>Real-time Traffic (Download/Upload in Mbps)</h3>
+<h3>Real-time Traffic (Upload/Download in Mbps)</h3>
 
 <!-- Tempat untuk gauge trafik -->
 <div class="gauge-container">
     <div>
         <canvas id="rxGauge"></canvas>
-        <div class="traffic-data">Download: <span id="rx-value">0 Mbps</span></div>
+        <div class="traffic-data">Upload: <span id="rx-value">0 Mbps</span></div>
     </div>
     <div>
         <canvas id="txGauge"></canvas>
-        <div class="traffic-data">Upload: <span id="tx-value">0 Mbps</span></div>
+        <div class="traffic-data">Download: <span id="tx-value">0 Mbps</span></div>
     </div>
 </div>
 
