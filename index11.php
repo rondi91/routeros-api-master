@@ -15,6 +15,15 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-heading">Menu</div>
         <a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+         <!-- Wireless Menu with Dropdown -->
+         <div class="dropdown">
+         <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fas fa-cogs"></i> WIRELESS</a>
+                           
+                        <div class="dropdown-menu" aria-labelledby="wirelessDropdown">
+                            <a class="dropdown-item" href="wireless.php">Wireless Registration</a>
+                            <a class="dropdown-item" href="scan.php">Scan</a> <!-- Menu SCAN -->
+                        </div>
+                    </li>
         <a href="pppoe_secrets.php"><i class="fas fa-users"></i> PPPoE Secrets</a>
         <a href="network_monitor.php"><i class="fas fa-network-wired"></i> Network Monitor</a>
         <a href="pppoe_billing.php"><i class="fas fa-file-invoice-dollar"></i> Billing</a>
