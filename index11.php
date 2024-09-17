@@ -27,7 +27,7 @@
         <a href="pppoe_secrets.php"><i class="fas fa-users"></i> PPPoE Secrets</a>
         <a href="network_monitor.php"><i class="fas fa-network-wired"></i> Network Monitor</a>
         <a href="pppoe_billing.php"><i class="fas fa-file-invoice-dollar"></i> Billing</a>
-        <a href="schedule.php"><i class="fas fa-calendar-alt"></i> Scheduler</a>
+        <a href="/view_schedule/index.php"><i class="fas fa-calendar-alt"></i> Scheduler</a>
         <a href="ping_test.php"><i class="fas fa-wifi"></i> Ping Test</a>
         <!-- Dropdown menu untuk Settings -->
         <div class="dropdown">
