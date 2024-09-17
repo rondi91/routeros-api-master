@@ -92,6 +92,9 @@ if (isset($_POST['edit_router'])) {
  <div class="sidebar" id="sidebar">
         <div class="sidebar-heading">Menu</div>
         <a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+         <!-- Menu baru untuk WIRELESS -->
+        
+        <a href="wireless.php"><i class="fas fa-users"></i> WIRELESS</a>
         <a href="pppoe_secrets.php"><i class="fas fa-users"></i> PPPoE Secrets</a>
         <a href="network_monitor.php"><i class="fas fa-network-wired"></i> Network Monitor</a>
         <a href="pppoe_billing.php"><i class="fas fa-file-invoice-dollar"></i> Billing</a>
@@ -110,7 +113,7 @@ if (isset($_POST['edit_router'])) {
 
     <!-- Tombol Collapse -->
     <span class="collapse-btn" id="collapseBtn"><i class="fas fa-bars"></i></span>
-    
+
 <div class="content" id="content">
     <h2>Router Settings (Using JSON)</h2>
 
