@@ -1,0 +1,30 @@
+{
+    "1": {
+        "id": 2,
+        "name": "GX4",
+        "ip_address": "192.168.9.1",
+        "username": "rondi",
+        "password": "21184662"
+    },
+    "2": {
+        "id": 3,
+        "name": "GR3_OLD",
+        "ip_address": "192.168.255.20",
+        "username": "rondi",
+        "password": "21184662"
+    },
+    "3": {
+        "id": 4,
+        "name": "GX4_2",
+        "ip_address": "192.168.255.21",
+        "username": "rondi",
+        "password": "21184662"
+    },
+    "4": {
+        "id": 5,
+        "name": "AP_SOL",
+        "ip_address": "192.168.8.7",
+        "username": "rondi",
+        "password": "21184662"
+    }
+}
