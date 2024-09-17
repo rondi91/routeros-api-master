@@ -26,5 +26,12 @@
         "ip_address": "192.168.8.7",
         "username": "rondi",
         "password": "21184662"
+    },
+    "5": {
+        "id": 6,
+        "name": "AP RND 5 ATIK",
+        "ip_address": "192.168.8.11",
+        "username": "rondi",
+        "password": "21184662"
     }
 }

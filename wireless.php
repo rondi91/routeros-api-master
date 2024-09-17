@@ -8,34 +8,7 @@ function getRouters() {
     $data = file_get_contents($jsonFile);
     return json_decode($data, true);
 }
-
-// Fungsi untuk mengambil data wireless dari router menggunakan API Mikrotik
-function getWirelessRegistrations($ip, $username, $password) {
-    require_once 'koneksi.php';
-    $API = new RouterosAPI();
-
-    if ($API->connect($ip, $username, $password)) {
-        // Fetch wireless registration-table
-        $registrations = $API->comm('/interface/wireless/registration-table/print');
-        $API->disconnect();
-        return $registrations;
-    } else {
-        return null;
-    }
-}
-
 $routers = getRouters();
-$wirelessData = [];
-
-// Loop untuk mendapatkan data dari semua router
-foreach ($routers as $router) {
-    $data = getWirelessRegistrations($router['ip_address'], $router['username'], $router['password']);
-    if ($data !== null) {
-        $wirelessData[$router['name']] = $data;
-    } else {
-        $wirelessData[$router['name']] = "Error connecting to the router.";
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -71,50 +44,55 @@ foreach ($routers as $router) {
     <!-- Tombol Collapse -->
     <span class="collapse-btn" id="collapseBtn"><i class="fas fa-bars"></i></span>
 
+    <!-- Konten Utama -->
     <div class="content" id="content">
+
+
     <h2>Wireless Registration Table</h2>
 
-    <!-- Looping untuk menampilkan data wireless dari setiap router -->
-    <?php foreach ($wirelessData as $routerName => $data): ?>
-        <h3>Router: <?= $routerName; ?></h3>
-        <?php if (is_array($data)): ?>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>MAC Address</th>
-                        <th>Interface</th>
-                        <th>Signal Strength</th>
-                        <th>Radio name</th>
-                        <th>TX Rate</th>
-                        <th>RX Rate</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- <?php var_dump($data); ?> -->
-                    <?php foreach ($data as $client): ?>
-                        <tr>
-                            <td><?= $client['mac-address']; ?></td>
-                            <td><?= $client['interface']; ?></td>
-                            <td><?= $client['signal-strength']; ?></td>
-                            <td><?= $client['radio-name']; ?></td>
-                            <td><?= $client['tx-rate']; ?></td>
-                            <td><?= $client['rx-rate']; ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php else: ?>
-            <p><?= $data; ?></p> <!-- Menampilkan error jika tidak bisa koneksi ke router -->
-        <?php endif; ?>
-        <hr>
-    <?php endforeach; ?>
+    <!-- Dropdown untuk memilih router -->
+    <div class="form-group">
+        <label for="routerSelect">Select Router:</label>
+        <select class="form-control" id="routerSelect">
+            <option value="">-- Select Router --</option>
+            <?php foreach ($routers as $router): ?>
+                <option value="<?= $router['id']; ?>"><?= $router['name']; ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <!-- Tempat menampilkan data wireless registration -->
+    <div id="wirelessData">
+        <p>Please select a router to view wireless registration data.</p>
+    </div>
 </div>
 
 <!-- Bootstrap JS dan Popper -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-   <!-- Link ke file JavaScript terpisah -->
-   <script src="scripts.js"></script>
+
+<script>
+    // Ketika router dipilih, ambil data wireless registration via AJAX
+    $('#routerSelect').on('change', function() {
+        var routerId = $(this).val();
+        if (routerId) {
+            $.ajax({
+                url: 'get_wireless_data.php',
+                type: 'POST',
+                data: { router_id: routerId },
+                success: function(response) {
+                    $('#wirelessData').html(response);
+                },
+                error: function() {
+                    $('#wirelessData').html('<p>Error fetching data.</p>');
+                }
+            });
+        } else {
+            $('#wirelessData').html('<p>Please select a router to view wireless registration data.</p>');
+        }
+    });
+</script>
+
 </body>
 </html>
