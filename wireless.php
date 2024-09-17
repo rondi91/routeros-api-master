@@ -1,13 +1,13 @@
 <?php
-// File JSON atau database untuk menyimpan informasi router
+// Load routers from JSON
 $jsonFile = 'routers.json';
 
-// Fungsi untuk mendapatkan daftar router dari JSON
 function getRouters() {
     global $jsonFile;
     $data = file_get_contents($jsonFile);
     return json_decode($data, true);
 }
+
 $routers = getRouters();
 ?>
 
@@ -21,33 +21,8 @@ $routers = getRouters();
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-     <!-- Sidebar -->
-     <div class="sidebar" id="sidebar">
-        <div class="sidebar-heading">Menu</div>
-        <a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-        <a href="pppoe_secrets.php"><i class="fas fa-users"></i> PPPoE Secrets</a>
-        <a href="network_monitor.php"><i class="fas fa-network-wired"></i> Network Monitor</a>
-        <a href="pppoe_billing.php"><i class="fas fa-file-invoice-dollar"></i> Billing</a>
-        <a href="schedule.php"><i class="fas fa-calendar-alt"></i> Scheduler</a>
-        <a href="ping_test.php"><i class="fas fa-wifi"></i> Ping Test</a>
-        <!-- Dropdown menu untuk Settings -->
-        <div class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fas fa-cogs"></i> Settings</a>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="router_settings.php">Router Settings</a>
-                <a class="dropdown-item" href="user_management.php">User Management</a>
-                <a class="dropdown-item" href="interface_settings.php">Interface Settings</a>
-            </div>
-        </div>
-    </div>
 
-    <!-- Tombol Collapse -->
-    <span class="collapse-btn" id="collapseBtn"><i class="fas fa-bars"></i></span>
-
-    <!-- Konten Utama -->
-    <div class="content" id="content">
-
-
+<div class="container">
     <h2>Wireless Registration Table</h2>
 
     <!-- Dropdown untuk memilih router -->
@@ -73,23 +48,41 @@ $routers = getRouters();
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
-    // Ketika router dipilih, ambil data wireless registration via AJAX
+    // Fungsi untuk mengupdate tabel wireless registration setiap 5 detik
+    let interval;
+    
+    function fetchWirelessData(routerId) {
+        $.ajax({
+            url: 'get_wireless_data.php',
+            type: 'POST',
+            data: { router_id: routerId },
+            success: function(response) {
+                $('#wirelessData').html(response);
+            },
+            error: function() {
+                $('#wirelessData').html('<p>Error fetching data.</p>');
+            }
+        });
+    }
+
+    // Ketika router dipilih
     $('#routerSelect').on('change', function() {
         var routerId = $(this).val();
         if (routerId) {
-            $.ajax({
-                url: 'get_wireless_data.php',
-                type: 'POST',
-                data: { router_id: routerId },
-                success: function(response) {
-                    $('#wirelessData').html(response);
-                },
-                error: function() {
-                    $('#wirelessData').html('<p>Error fetching data.</p>');
-                }
-            });
+            // Hentikan interval lama jika ada
+            if (interval) {
+                clearInterval(interval);
+            }
+            // Jalankan fetchWirelessData pertama kali
+            fetchWirelessData(routerId);
+            // Jalankan AJAX secara berkala setiap 5 detik
+            interval = setInterval(function() {
+                fetchWirelessData(routerId);
+            }, 1000); // Update setiap 5 detik
         } else {
             $('#wirelessData').html('<p>Please select a router to view wireless registration data.</p>');
+            // Hentikan update jika tidak ada router yang dipilih
+            clearInterval(interval);
         }
     });
 </script>

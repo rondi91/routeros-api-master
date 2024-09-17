@@ -37,21 +37,23 @@ if (isset($_POST['router_id'])) {
                 echo '<table class="table table-bordered">';
                 echo '<thead>
                         <tr>
-                            <th>MAC Address</th>
-                            <th>Interface</th>
+                            
                             <th>Signal Strength</th>
                             <th>Radio name</th>
+                            <th>TX/RX CCQ</th>
                             <th>TX Rate</th>
                             <th>RX Rate</th>
                         </tr>
                       </thead>';
                 echo '<tbody>';
+                // var_dump($wirelessData);
                 foreach ($wirelessData as $client) {
                     echo '<tr>';
-                    echo '<td>' . $client['mac-address'] . '</td>';
-                    echo '<td>' . $client['interface'] . '</td>';
+                    // echo '<td>' . $client['mac-address'] . '</td>';
+                    // echo '<td>' . $client['interface'] . '</td>';
                     echo '<td>' . $client['signal-strength'] . '</td>';
                     echo '<td>' . $client['radio-name'] . '</td>';
+                    echo '<td>' . $client['rx-ccq'] .'/'.$client['tx-ccq']. '</td>';
                     echo '<td>' . $client['tx-rate'] . '</td>';
                     echo '<td>' . $client['rx-rate'] . '</td>';
                     echo '</tr>';
