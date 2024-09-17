@@ -7,13 +7,16 @@ $interfacesData = [];
 
 if ($API->connect($ip,$user,$pass)) {
     // Ambil data untuk beberapa interface Ethernet
-    $interfaces = ['ether2', 'ether4', 'ether5'];
+    $interfaces = ['ether2'];
 
     foreach ($interfaces as $interface) {
         $API->write('/interface/monitor-traffic', false);
         $API->write('=interface=' . $interface, false);
         $API->write('=once=', true);
         $read = $API->read();
+
+        print_r($read);
+        
         if (isset($read[0])) {
             $rx_bps = isset($read[0]['rx-bits-per-second']) ? $read[0]['rx-bits-per-second'] : 0;
             $tx_bps = isset($read[0]['tx-bits-per-second']) ? $read[0]['tx-bits-per-second'] : 0;

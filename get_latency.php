@@ -6,7 +6,7 @@ $API = new RouterosAPI();
 
 
 if ($API->connect($ip,$user,$pass)) {
-    $targets = ['8.8.8.8', 'youtube.com', 'facebook.com']; // IP atau domain tujuan
+    $targets = ['8.8.8.8', 'youtube.com', 'facebook.com','192.168.8.7']; // IP atau domain tujuan
     $results = [];
 
     foreach ($targets as $target) {

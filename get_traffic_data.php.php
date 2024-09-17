@@ -1,6 +1,6 @@
 <?php 
 
-require('network_monitor.php');
+// require('network_monitor.php');
 
 ?>
 <!DOCTYPE html>
@@ -18,7 +18,7 @@ require('network_monitor.php');
             fetch('network_monitor.php')  // Pastikan nama file di sini benar dan hanya satu kali '.php'
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Data fetched:', data); // Debug: log data fetched
+                    // console.log('Data fetched:', data); // Debug: log data fetched
                     Object.keys(data).forEach((interface, index) => {
                         drawGauge(interface, data[interface].rx_mbps, data[interface].tx_mbps);
                     });
@@ -44,7 +44,7 @@ require('network_monitor.php');
             };
 
             // Debug: log chart drawing
-            console.log('Drawing gauge for:', interface, 'RX Mbps:', rxMbps, 'TX Mbps:', txMbps);
+            // console.log('Drawing gauge for:', interface, 'RX Mbps:', rxMbps, 'TX Mbps:', txMbps);
 
             var chart = new google.visualization.Gauge(document.getElementById('chart_div_' + interface));
             chart.draw(data, options);

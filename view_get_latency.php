@@ -5,9 +5,9 @@
     <title>Latency Monitor</title>
     <style>
         #latencyChart {
-            max-width: 1000px;
-            max-height: 600px;
-            width: 100%;
+            max-width: 600px;
+            max-height: 300px;
+            width: 50%;
             height: auto;
         }
     </style>
@@ -18,7 +18,8 @@
         let latencyData = {
             google: [],
             youtube: [],
-            facebook: []
+            facebook: [],
+            AP_SOL: []
         };
 
         function fetchLatency() {
@@ -44,11 +45,13 @@
             latencyData.google.push(data['8.8.8.8']);
             latencyData.youtube.push(data['youtube.com']);
             latencyData.facebook.push(data['facebook.com']);
+            latencyData.AP_SOL.push(data['192.168.8.7']);
 
             if (latencyData.google.length > 20) {
                 latencyData.google.shift();
                 latencyData.youtube.shift();
                 latencyData.facebook.shift();
+                latencyData.AP_SOL.shift();
             }
 
             if (chart) {
@@ -76,6 +79,12 @@
                                 label: 'Facebook',
                                 data: latencyData.facebook,
                                 borderColor: 'green',
+                                fill: false
+                            },
+                            {
+                                label: 'AP_SOL',
+                                data: latencyData.AP_SOL,
+                                borderColor: 'brown',
                                 fill: false
                             }
                         ]
@@ -107,7 +116,7 @@
             }
         }
 
-        setInterval(fetchLatency, 1000); // Fetch data every 5 seconds
+        setInterval(fetchLatency, 2000); // Fetch data every 5 seconds
     </script>
 </head>
 <body>

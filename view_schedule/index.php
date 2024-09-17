@@ -1,4 +1,27 @@
 <?php
+
+session_start();
+
+// Cek apakah user sudah login
+if (!isset($_SESSION['username'])) {
+    header('Location: login.php');
+    exit();
+}
+
+// Ambil username yang login
+$current_user = $_SESSION['username'];
+$role = $_SESSION['role'];
+
+if (!isset($_GET['name'])) {
+    echo "No PPPoE user specified.";
+    exit();
+}
+
+// Hanya user admin yang bisa akses semua, user biasa hanya bisa akses detail dirinya
+if ($role !== 'admin' && $current_user !== $_GET['name']) {
+    echo "Access denied. You can only view your own PPPoE details.";
+    exit();
+}
 require('../koneksi.php');
 
 $API = new RouterosAPI();
