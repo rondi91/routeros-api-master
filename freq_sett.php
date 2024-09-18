@@ -5,9 +5,8 @@ function getFrequencyUsage($ip, $username, $password, $interface) {
     $API = new RouterosAPI();
 
     if ($API->connect($ip, $username, $password)) {
-        $API->write('/interface/wireless/frequency-monitor', false);  // Kirim perintah scan
-        $API->write('=number=0', false);  // Ganti "wlan1" dengan interface yang valid
-        $API->write('=duration=60');  // Durasi scan dalam detik
+        $API->write('/interface/wireless/frequency-monitor', false);
+        $API->write('=number=0');
         $frequencyUsage = $API->read();
         $API->disconnect();
         return $frequencyUsage;
@@ -16,20 +15,27 @@ function getFrequencyUsage($ip, $username, $password, $interface) {
     }
 }
 
-function findBestFrequency($frequencyData) {
+function findBestFrequencyWithReason($frequencyData) {
     $bestFrequency = null;
     $lowestUsage = 100;
+    $lowestInterference = 100;
+    $reason = "";
 
     foreach ($frequencyData as $data) {
-        if (isset($data['use']) && isset($data['nf'])) {
-            if ($data['use'] < $lowestUsage && $data['nf'] < $lowestUsage) {
-                $bestFrequency = $data['freq'];
-                $lowestUsage = $data['use'];
+        if (isset($data['usage-percentage']) && isset($data['interference-percentage'])) {
+            if ($data['usage-percentage'] < $lowestUsage && $data['interference-percentage'] < $lowestInterference) {
+                $bestFrequency = $data['frequency'];
+                $lowestUsage = $data['usage-percentage'];
+                $lowestInterference = $data['interference-percentage'];
+                $reason = "Frekuensi {$data['frequency']} MHz dipilih karena memiliki persentase penggunaan terendah ({$data['usage-percentage']}%) dan tingkat interferensi rendah ({$data['interference-percentage']}%).";
             }
         }
     }
 
-    return $bestFrequency;
+    return [
+        'frequency' => $bestFrequency,
+        'reason' => $reason
+    ];
 }
 
 function setFrequency($ip, $username, $password, $interface, $newFrequency) {
@@ -49,22 +55,22 @@ function setFrequency($ip, $username, $password, $interface, $newFrequency) {
 }
 
 // Proses
-$ip = '172.16.30.3'; // IP Router
-$username = 'rondi';  // Username Router
-$password = '21184662';  // Password Router
+$ip = '192.168.88.1'; // IP Router
+$username = 'admin';  // Username Router
+$password = 'password';  // Password Router
 $interface = 'wlan1';  // Interface yang akan diubah frekuensinya
 
 // 1. Scan frequency usage
 $frequencyUsage = getFrequencyUsage($ip, $username, $password, $interface);
 
-// 2. Cari frekuensi terbaik
-$bestFrequency = findBestFrequency($frequencyUsage);
-var_dump($bestFrequency);
+// 2. Cari frekuensi terbaik dengan alasan
+$bestFrequencyData = findBestFrequencyWithReason($frequencyUsage);
 
-// 3. Jika ditemukan frekuensi terbaik, ubah setting router
-if ($bestFrequency) {
-    $result = setFrequency($ip, $username, $password, $interface, $bestFrequency);
-    echo $result;
+if ($bestFrequencyData['frequency']) {
+    // 3. Ubah setting router
+    $result = setFrequency($ip, $username, $password, $interface, $bestFrequencyData['frequency']);
+    echo $result . "<br>";
+    echo "Alasan: " . $bestFrequencyData['reason'];
 } else {
     echo "Tidak ditemukan frekuensi terbaik.";
 }
